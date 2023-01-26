@@ -90,7 +90,9 @@ SpacesBeforeTrailingComments: 1
 SpacesInCStyleCastParentheses: false
 SpacesInConditionalStatement: false
 SpacesInContainerLiterals: false
-SpacesInLineCommentPrefix: -1
+SpacesInLineCommentPrefix: 
+  Minimum: 1
+  Maximum: -1
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: Auto
