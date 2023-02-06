@@ -1,7 +1,7 @@
-NAME = libpwdraw
+NAME = libtarpe2d_draw
 
 
-INCLUDES = -Iinclude
+INCLUDES = -Iinclude -I../include
 SRC_DIR = src
 OBJ_DIR = obj
 LIB_DIR = lib

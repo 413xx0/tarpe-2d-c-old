@@ -1,10 +1,10 @@
 NAME = libtarpe2d
 MODULES = 
 
-PWDRAWLIB_PATH = pwdrawlib
-PWDRAWLIB_LIB_DIR = $(PWDRAWLIB_PATH)/lib
-PWDRAWLIB_NAME = pwdraw
-PWDRAWLIB_BUILD_GOAL = lib_static
+LIBTARPE2D_DRAW_PATH = libtarpe2d_draw
+LIBTARPE2D_DRAW_LIB_DIR = $(LIBTARPE2D_DRAW_PATH)/lib
+LIBTARPE2D_DRAW_NAME = tarpe2d_draw
+LIBTARPE2D_DRAW_BUILD_GOAL = lib_static
 
 
 
@@ -43,8 +43,8 @@ WARN_CONF = -Wall -Wextra -Wpedantic -Werror
 STD = -std=c17
 CFLAGS = $(INCLUDES) $(OPT) $(WARN_CONF) $(STD)
 
-MAIN_LDFLAGS = -L$(PWDRAWLIB_LIB_DIR)
-MAIN_LDLIBS = -l$(PWDRAWLIB_NAME)
+MAIN_LDFLAGS = -L$(LIBTARPE2D_DRAW_LIB_DIR)
+MAIN_LDLIBS = -l$(LIBTARPE2D_DRAW_NAME)
 
 CC = gcc
 
@@ -75,12 +75,12 @@ $(LIB_TARGET_STATIC): $(LIB_DIR) $(LIB_OBJS)
 $(_MAIN_OBJ_DIR)/%.o: $(_MAIN_SRC_DIR)/%.c $(_MAIN_OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(MAIN_TARGET): $(LIB_OBJS) $(MAIN_OBJS) $(BIN_DIR) pwdrawlib_build
+$(MAIN_TARGET): $(LIB_OBJS) $(MAIN_OBJS) $(BIN_DIR) libtarpe2d_draw_build
 	$(CC) $(MAIN_LDFLAGS) $(LIB_OBJS) $(MAIN_OBJS) $(MAIN_LDLIBS) -o $@
 
-.PHONY: pwdrawlib_build
-pwdrawlib_build: $(PWDRAWLIB_PATH)
-	$(MAKE) -C $< $(PWDRAWLIB_BUILD_GOAL)
+.PHONY: libtarpe2d_draw_build
+libtarpe2d_draw_build: $(LIBTARPE2D_DRAW_PATH)
+	$(MAKE) -C $< $(LIBTARPE2D_DRAW_BUILD_GOAL)
 
 
 $(_DIRS_MAY_NOT_EXIST):
