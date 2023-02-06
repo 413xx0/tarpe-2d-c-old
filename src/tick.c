@@ -1,5 +1,6 @@
 #include <libtarpe2d/rigidbody.h>
 #include <libtarpe2d/tick.h>
+#include <stdint.h>
 
 
 static inline void tick_rigidbody(struct rigidbody * rb, float_t dt)
@@ -20,7 +21,8 @@ static inline void tick_rigidbody(struct rigidbody * rb, float_t dt)
 
 void tarpe_tick_arr_iter(struct rb_array_iter * iter, float_t dt)
 {
-	for (struct rigidbody * i = iter->start; i < iter->end; i += iter->step)
+	for (struct rigidbody * i = iter->start; i < iter->end;
+	     i = (struct rigidbody *)((int8_t *)i + iter->step))
 	{
 		tick_rigidbody(i, dt);
 	}
