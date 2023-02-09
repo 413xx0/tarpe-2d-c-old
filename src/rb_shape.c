@@ -1,4 +1,5 @@
 #include <libtarpe2d/rb_shape.h>
+#include <string.h>
 
 
 #define _SET_RB_INIT_ARGS(rb)                                          \
@@ -12,7 +13,7 @@
 	} while (0);
 
 
-struct rb_circle * rb_circle_new(float_t radius, _RB_INIT_ARGS)
+struct rb_circle * rb_circle_new(double_t radius, _RB_INIT_ARGS)
 {
 	struct rb_circle * circ = malloc(sizeof(struct rb_circle));
 	if (circ != NULL)
@@ -27,15 +28,23 @@ struct rb_circle * rb_circle_new(float_t radius, _RB_INIT_ARGS)
 	return circ;
 }
 
+struct rb_circle * rb_circle_copy(struct rb_circle * src)
+{
+	struct rb_circle * circ = malloc(sizeof(struct rb_circle));
+	if (circ != NULL) memcpy(circ, src, sizeof(struct rb_circle));
+	return circ;
+}
+
 void rb_circle_delete(struct rb_circle * circ) { free(circ); }
 
 
-struct rb_rectangle * rb_rectangle_new(float_t width, float_t height, _RB_INIT_ARGS)
+struct rb_rectangle * rb_rectangle_new(double_t width, double_t height, _RB_INIT_ARGS)
 {
 	struct rb_rectangle * rect = malloc(sizeof(struct rb_rectangle));
 	if (rect != NULL)
 	{
 		rect->side_sizes = (struct vec2){.x = width, .y = height};
+		rect->half_side_sizes = (struct vec2){.x = width / 2, .y = height / 2};
 		rect->base.type = TARPE__RB_SHAPE_TYPE__RECTANGLE;
 
 		_SET_RB_INIT_ARGS(rect->base.rb);
@@ -47,4 +56,14 @@ struct rb_rectangle * rb_rectangle_new(float_t width, float_t height, _RB_INIT_A
 	return rect;
 }
 
+struct rb_rectangle * rb_rectangle_copy(struct rb_rectangle * src)
+{
+	struct rb_rectangle * rect = malloc(sizeof(struct rb_rectangle));
+	if (rect != NULL) memcpy(rect, src, sizeof(struct rb_rectangle));
+	return rect;
+}
+
 void rb_rectangle_delete(struct rb_rectangle * rect) { free(rect); }
+
+
+void rb_shape_delete(struct rb_shape_base * shape) { free(shape); }

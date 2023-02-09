@@ -8,19 +8,19 @@
 
 struct rigidbody
 {
-	float_t mass;
-	float_t inv_mass;
-	float_t inv_moment_of_inertia;
+	double_t mass;
+	double_t inv_mass;
+	double_t inv_moment_of_inertia;
 
 	struct vec2 pos;
 
 	struct vec2 linear_velocity;
 
-	float_t angle;
-	float_t angular_velocity;
+	double_t angle;
+	double_t angular_velocity;
 
 	struct vec2 tick_force;
-	float_t torque;
+	double_t torque;
 };
 
 

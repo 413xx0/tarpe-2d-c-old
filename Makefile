@@ -6,10 +6,15 @@ LIBTARPE2D_DRAW_LIB_DIR = $(LIBTARPE2D_DRAW_PATH)/lib
 LIBTARPE2D_DRAW_NAME = tarpe2d_draw
 LIBTARPE2D_DRAW_BUILD_GOAL = lib_static
 
+LIBTARPE2D_DRAW_INCULDE_DIRS = $(LIBTARPE2D_DRAW_PATH)/include
+LIBTARPE2D_LDFLAGS = 
+LIBTARPE2D_LDLIBS = -lSDL2 -lSDL2_gpu
 
 
-_INCLUDE_DIR = include
-INCLUDES = -I$(_INCLUDE_DIR)
+
+_INCLUDE_DIRS = include $(LIBTARPE2D_DRAW_INCULDE_DIRS)
+INCLUDES = $(addprefix -I,$(_INCLUDE_DIRS))
+HEADERS = $(foreach dir,$(_INCLUDE_DIRS),$(wildcard $(dir)/**/*.h))
 
 _SRC_DIR = src
 SRC_DIRS = $(_SRC_DIR) $(addprefix $(_SRC_DIR)/,$(MODULES))
@@ -43,8 +48,8 @@ WARN_CONF = -Wall -Wextra -Wpedantic -Werror
 STD = -std=c17
 CFLAGS = $(INCLUDES) $(OPT) $(WARN_CONF) $(STD)
 
-MAIN_LDFLAGS = -L$(LIBTARPE2D_DRAW_LIB_DIR)
-MAIN_LDLIBS = -l$(LIBTARPE2D_DRAW_NAME)
+MAIN_LDFLAGS = -L$(LIBTARPE2D_DRAW_LIB_DIR) $(LIBTARPE2D_LDFLAGS)
+MAIN_LDLIBS = -lm -l$(LIBTARPE2D_DRAW_NAME) $(LIBTARPE2D_LDLIBS)
 
 CC = gcc
 
@@ -63,16 +68,16 @@ main: $(MAIN_TARGET)
 
 vpath %.c $(SRC_DIRS)
 define make-lib-objs-goals
-$1/%.o: %.c $1
+$1/%.o: %.c $1 $(HEADERS)
 	$(CC) $(CFLAGS) -c $$< -o $$@
 endef
 $(foreach dir,$(OBJ_DIRS),$(eval $(call make-lib-objs-goals,$(dir))))
 
-$(LIB_TARGET_STATIC): $(LIB_DIR) $(LIB_OBJS)
+$(LIB_TARGET_STATIC): $(LIB_DIR) $(LIB_OBJS) 
 	ar rcs $@ $(filter-out $<,$^)
 
 
-$(_MAIN_OBJ_DIR)/%.o: $(_MAIN_SRC_DIR)/%.c $(_MAIN_OBJ_DIR)
+$(_MAIN_OBJ_DIR)/%.o: $(_MAIN_SRC_DIR)/%.c $(_MAIN_OBJ_DIR) $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(MAIN_TARGET): $(LIB_OBJS) $(MAIN_OBJS) $(BIN_DIR) libtarpe2d_draw_build

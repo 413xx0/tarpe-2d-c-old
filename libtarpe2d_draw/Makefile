@@ -1,7 +1,9 @@
 NAME = libtarpe2d_draw
 
+_INCLUDE_DIRS = include ../include
+INCLUDES = $(addprefix -I,$(_INCLUDE_DIRS))
+HEADERS = $(foreach dir,$(_INCLUDE_DIRS),$(wildcard $(dir)/**/*.h))
 
-INCLUDES = -Iinclude -I../include
 SRC_DIR = src
 OBJ_DIR = obj
 LIB_DIR = lib
@@ -33,7 +35,7 @@ lib_static: $(LIB_TARGET_STATIC)
 $(LIB_TARGET_STATIC): $(LIB_DIR) $(LIB_OBJS)
 	ar rcs $@ $(filter-out $<,$^)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(OBJ_DIR) $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
