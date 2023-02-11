@@ -1,6 +1,7 @@
 #ifndef __MAIN_LIBTARPE2D_H__
 #define __MAIN_LIBTARPE2D_H__
 
+#include <libtarpe2d/bh86/quadtree.h>
 #include <libtarpe2d/rb_shape.h>
 #include <libtarpe2d/rb_shape_iter.h>
 #include <libtarpe2d/rigidbody.h>
