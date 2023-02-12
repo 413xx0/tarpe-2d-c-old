@@ -25,7 +25,7 @@ struct quadtree
 
 	double_t total_mass;
 	struct vec2 center_of_mass; // NOT valid when quadtree is building
-	struct vec2 * rb_pos; // valid only for state == _BH86_QTSTATE_FULL
+	struct rigidbody * rb; // valid only for state == _BH86_QTSTATE_FULL
 
 	struct quadtree * childs;
 };

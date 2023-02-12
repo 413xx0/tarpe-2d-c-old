@@ -1,3 +1,4 @@
+#include <libtarpe2d/bh86/bh.h>
 #include <libtarpe2d/rb_shape.h>
 #include <libtarpe2d/rigidbody.h>
 #include <libtarpe2d/tick.h>
@@ -22,17 +23,22 @@ static inline void tick_rigidbody(struct rigidbody * rb, double_t dt)
 	rb->torque = 0;
 }
 
-void tarpe_tick_ptr_arr_iter(struct rb_ptr_array_iter * iter, double_t dt)
+int tarpe_tick_ptr_arr_iter(struct rb_ptr_array_iter * iter, double_t dt)
 {
+	if (bh86_apply_gravity_forces_ptr_arr_iter(iter)) return 1;
+
 	for (struct rb_shape_base ** i = iter->start; i < iter->end;
 	     i = (struct rb_shape_base **)((int8_t *)i + iter->step))
 	{
 		tick_rigidbody(&((*i)->rb), dt);
 	}
+	return 0;
 }
 
 int tarpe_tick_uni_iter(struct rb_uni_iter * iter, double_t dt)
 {
+	if (bh86_apply_gravity_forces_uni_iter(iter)) return 1;
+
 	void * userdata = malloc(iter->userdata_size);
 	if (userdata == NULL) return 1;
 

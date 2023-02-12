@@ -29,7 +29,7 @@ static inline int tarpe2d_draw_zoom_camera_xy(GPU_Target * screen, float zoom)
 
 int tarpe2d_draw_poll_events(void);
 
-void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_count);
+void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_count, bool do_flip);
 
 
 static inline double_t tarpe2d_draw_get_dt(uint64_t * frame_start)

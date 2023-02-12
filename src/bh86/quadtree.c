@@ -36,28 +36,27 @@ static inline int quadtree_divide(struct quadtree * qt)
 	return 0;
 }
 
-static inline void quadtree_empty_insert(struct quadtree * qt, struct vec2 * rb_pos, double_t rb_mass)
+static inline void quadtree_empty_insert(struct quadtree * qt, struct rigidbody * rb)
 {
-	qt->rb_pos = rb_pos;
-	vec2_mul(rb_pos, rb_mass, &qt->center_of_mass);
-	qt->total_mass = rb_mass;
+	qt->rb = rb;
+	vec2_mul(&rb->pos, rb->mass, &qt->center_of_mass);
+	qt->total_mass = rb->mass;
 	qt->state = _BH86_QTSTATE_FULL;
 }
 
 int quadtree_insert(struct quadtree * qt, struct rigidbody * rb)
 {
-	if (qt->state & _BH86_QTSTATE_EMPTY) { quadtree_empty_insert(qt, &rb->pos, rb->mass); }
+	if (qt->state & _BH86_QTSTATE_EMPTY) { quadtree_empty_insert(qt, rb); }
 	else
 	{
 		if (qt->state & _BH86_QTSTATE_FULL)
 		{
 			if (quadtree_divide(qt)) return 1;
-			quadtree_empty_insert(qt->childs + quadtree_quarter(qt, qt->rb_pos),
-					      qt->rb_pos,
-					      qt->total_mass);
+			quadtree_empty_insert(qt->childs + quadtree_quarter(qt, &qt->rb->pos), qt->rb);
 			qt->state = _BH86_QTSTATE_DIVIDED;
 		}
 		quadtree_insert(qt->childs + quadtree_quarter(qt, &rb->pos), rb);
+
 		struct vec2 tmp;
 		vec2_mul(&rb->pos, rb->mass, &tmp);
 		vec2_add(&qt->center_of_mass, &tmp, &qt->center_of_mass);
@@ -71,7 +70,7 @@ int quadtree_insert(struct quadtree * qt, struct rigidbody * rb)
 void quadtree_compute_centers_of_mass(struct quadtree * qt)
 {
 	if (qt->state & _BH86_QTSTATE_EMPTY) { return; }
-	else if (qt->state & _BH86_QTSTATE_FULL) { vec2_copy(&qt->center_of_mass, qt->rb_pos); }
+	else if (qt->state & _BH86_QTSTATE_FULL) { vec2_copy(&qt->center_of_mass, &qt->rb->pos); }
 	else /* qt->state & _BH86_QTSTATE_DIVIDED */
 	{
 		vec2_div(&qt->center_of_mass, qt->total_mass, &qt->center_of_mass);
@@ -81,7 +80,7 @@ void quadtree_compute_centers_of_mass(struct quadtree * qt)
 }
 
 
-static inline struct quadtree * quadtree_make_root(double_t max_axis_dist)
+static inline struct quadtree * quadtree_make_root(struct vec2 * pos, double_t max_axis_dist)
 {
 	struct quadtree * qt = malloc(sizeof(struct quadtree));
 	if (qt == NULL) return NULL;
@@ -93,6 +92,7 @@ static inline struct quadtree * quadtree_make_root(double_t max_axis_dist)
 	while (size < 2 * max_axis_dist) size *= 2;
 
 	memset(qt, 0, sizeof(struct quadtree));
+	vec2_copy(&qt->pos, pos);
 	qt->size = size;
 	qt->state = _BH86_QTSTATE_EMPTY;
 
@@ -102,18 +102,26 @@ static inline struct quadtree * quadtree_make_root(double_t max_axis_dist)
 
 struct quadtree * quadtree_build_ptr_arr_iter(struct rb_ptr_array_iter * bodies)
 {
-	double_t max_axis_dist = 0., d;
+	double_t d;
+	struct vec2 pos = (struct vec2){0, 0}, max_dist = (struct vec2){0, 0};
 	for (struct rb_shape_base ** i = bodies->start; i < bodies->end;
 	     i = (struct rb_shape_base **)((int8_t *)i + bodies->step))
 	{
-		d = fabs(((struct rigidbody *)*i)->pos.x);
-		if (d > max_axis_dist) max_axis_dist = d;
+		d = ((struct rigidbody *)*i)->pos.x;
+		pos.x += d;
+		d = fabs(d);
+		if (d > max_dist.x) max_dist.x = d;
 
-		d = fabs(((struct rigidbody *)*i)->pos.y);
-		if (d > max_axis_dist) max_axis_dist = d;
+		d = ((struct rigidbody *)*i)->pos.y;
+		pos.y += d;
+		d = fabs(d);
+		if (d > max_dist.y) max_dist.y = d;
 	}
+	vec2_div(&pos, bodies->rb_count, &pos);
+	vec2_sub(&max_dist, &pos, &max_dist);
 
-	struct quadtree * qt = quadtree_make_root(max_axis_dist);
+	struct quadtree * qt =
+		quadtree_make_root(&pos, max_dist.x > max_dist.y ? max_dist.x : max_dist.y);
 	if (qt == NULL) return NULL;
 
 	for (struct rb_shape_base ** i = bodies->start; i < bodies->end;
@@ -134,20 +142,28 @@ struct quadtree * quadtree_build_uni_iter(struct rb_uni_iter * bodies)
 	void * userdata = malloc(bodies->userdata_size);
 	if (userdata == NULL) return NULL;
 
-	double_t max_axis_dist = 0., d;
+	double_t d;
+	struct vec2 pos = (struct vec2){0, 0}, max_dist = (struct vec2){0, 0};
 	struct rb_shape_base * i = bodies->get_first(bodies->data_structure, userdata);
 	while (i != NULL)
 	{
-		d = fabs(((struct rigidbody *)i)->pos.x);
-		if (d > max_axis_dist) max_axis_dist = d;
+		d = ((struct rigidbody *)i)->pos.x;
+		pos.x += d;
+		d = fabs(d);
+		if (d > max_dist.x) max_dist.x = d;
 
-		d = fabs(((struct rigidbody *)i)->pos.y);
-		if (d > max_axis_dist) max_axis_dist = d;
+		d = ((struct rigidbody *)i)->pos.y;
+		pos.y += d;
+		d = fabs(d);
+		if (d > max_dist.y) max_dist.y = d;
 
 		i = bodies->get_next(userdata);
 	}
+	vec2_div(&pos, bodies->rb_count, &pos);
+	vec2_sub(&max_dist, &pos, &max_dist);
 
-	struct quadtree * qt = quadtree_make_root(max_axis_dist);
+	struct quadtree * qt =
+		quadtree_make_root(&pos, max_dist.x > max_dist.y ? max_dist.x : max_dist.y);
 	if (qt == NULL) return NULL;
 
 	memset(userdata, 0, bodies->userdata_size);

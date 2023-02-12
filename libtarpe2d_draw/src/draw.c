@@ -65,7 +65,7 @@ int tarpe2d_draw_poll_events(void)
 	arr_name[idx_x] = vec2.x;                 \
 	arr_name[idx_y] = vec2.y;
 
-void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_count)
+void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_count, bool do_flip)
 {
 	GPU_Clear(screen);
 
@@ -150,5 +150,5 @@ void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_
 		}
 	}
 
-	GPU_Flip(screen);
+	if (do_flip) GPU_Flip(screen);
 }

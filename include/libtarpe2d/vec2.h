@@ -86,17 +86,17 @@ static inline double_t vec2_angle(struct vec2 * v, struct vec2 * u)
 	return acos(vec2_dot(v, u) / (vec2_abs(v) * vec2_abs(u)));
 }
 
-static inline double_t vec2_sqr_dist(struct vec2 * v, struct vec2 * u)
+static inline double_t vec2_sqr_dist(struct vec2 * start, struct vec2 * end)
 {
 	struct vec2 tmp;
-	vec2_sub(v, u, &tmp);
+	vec2_sub(end, start, &tmp);
 	return vec2_sqr_abs(&tmp);
 }
 
-static inline double_t vec2_dist(struct vec2 * v, struct vec2 * u)
+static inline double_t vec2_dist(struct vec2 * start, struct vec2 * end)
 {
 	struct vec2 tmp;
-	vec2_sub(v, u, &tmp);
+	vec2_sub(end, start, &tmp);
 	return vec2_abs(&tmp);
 }
 
