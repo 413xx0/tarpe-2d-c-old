@@ -140,6 +140,7 @@ struct quadtree * quadtree_build_ptr_arr_iter(struct rb_ptr_array_iter * bodies)
 struct quadtree * quadtree_build_uni_iter(struct rb_uni_iter * bodies)
 {
 	void * userdata = malloc(bodies->userdata_size);
+	memset(userdata, 0, bodies->userdata_size);
 	if (userdata == NULL) return NULL;
 
 	double_t d;

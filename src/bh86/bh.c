@@ -94,6 +94,7 @@ int bh86_apply_gravity_forces_uni_iter(struct rb_uni_iter * bodies)
 	if (qt->state == _BH86_QTSTATE_EMPTY) return 0;
 
 	void * userdata = malloc(bodies->userdata_size);
+	memset(userdata, 0, bodies->userdata_size);
 	if (userdata == NULL)
 	{
 		quadtree_delete(qt);

@@ -41,6 +41,7 @@ int tarpe_tick_uni_iter(struct rb_uni_iter * iter, double_t dt)
 
 	void * userdata = malloc(iter->userdata_size);
 	if (userdata == NULL) return 1;
+	memset(userdata, 0, iter->userdata_size);
 
 	struct rb_shape_base * i = iter->get_first(iter->data_structure, userdata);
 	while (i != NULL)
