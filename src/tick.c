@@ -17,6 +17,9 @@ static inline void tick_rigidbody(struct rigidbody * rb, double_t dt)
 	double_t angular_acceleration = rb->torque / rb->inv_moment_of_inertia;
 	rb->angular_velocity += angular_acceleration * dt;
 	rb->angle += rb->angular_velocity * dt;
+
+	vec2_nullify(&rb->tick_force);
+	rb->torque = 0;
 }
 
 void tarpe_tick_ptr_arr_iter(struct rb_ptr_array_iter * iter, double_t dt)

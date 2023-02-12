@@ -21,6 +21,8 @@ static inline void vec2_set(struct vec2 * v, double_t x, double_t y)
 	v->y = y;
 }
 
+static inline void vec2_nullify(struct vec2 * v) { memset(v, 0, sizeof(struct vec2)); }
+
 static inline bool vec2_cmp(struct vec2 * v, struct vec2 * u) { return v->x == u->x && v->y == u->y; }
 
 static inline void vec2_copy(struct vec2 * dest, struct vec2 * src)
