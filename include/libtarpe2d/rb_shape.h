@@ -24,18 +24,18 @@ struct rb_shape_base
 
 // clang-format off
 #define _RB_INIT_ARGS                                                                                    \
-	double_t mass, struct vec2 * start_pos, struct vec2 * start_linear_velocity, double_t start_angle, \
-		double_t start_angular_velocity
+	float_t mass, struct vec2 * start_pos, struct vec2 * start_linear_velocity, float_t start_angle, \
+		float_t start_angular_velocity
 // clang-format on
 
 
 struct rb_circle
 {
 	struct rb_shape_base base;
-	double_t radius;
+	float_t radius;
 };
 
-struct rb_circle * rb_circle_new(double_t radius, _RB_INIT_ARGS);
+struct rb_circle * rb_circle_new(float_t radius, _RB_INIT_ARGS);
 
 struct rb_circle * rb_circle_copy(struct rb_circle * circle);
 
@@ -49,7 +49,7 @@ struct rb_rectangle
 	struct vec2 half_side_sizes;
 };
 
-struct rb_rectangle * rb_rectangle_new(double_t width, double_t height, _RB_INIT_ARGS);
+struct rb_rectangle * rb_rectangle_new(float_t width, float_t height, _RB_INIT_ARGS);
 
 struct rb_rectangle * rb_rectangle_copy(struct rb_rectangle * rect);
 

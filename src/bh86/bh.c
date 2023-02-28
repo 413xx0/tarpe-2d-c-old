@@ -4,7 +4,7 @@
 
 
 static inline void body_apply_node_force(struct rigidbody * rb, struct vec2 * dist,
-					 double_t dist_magnitude, double_t other_mass)
+					 float_t dist_magnitude, float_t other_mass)
 {
 	struct vec2 force;
 	vec2_mul(dist,
@@ -15,7 +15,7 @@ static inline void body_apply_node_force(struct rigidbody * rb, struct vec2 * di
 	vec2_add(&rb->tick_force, &force, &rb->tick_force);
 }
 
-static inline double_t get_node_dist(struct rigidbody * rb, struct quadtree * node, struct vec2 * dist)
+static inline float_t get_node_dist(struct rigidbody * rb, struct quadtree * node, struct vec2 * dist)
 {
 	vec2_sub(&node->center_of_mass, &rb->pos, dist);
 	return vec2_abs(dist);
@@ -24,7 +24,7 @@ static inline double_t get_node_dist(struct rigidbody * rb, struct quadtree * no
 void body_apply_gravity_forces(struct rigidbody * rb, struct quadtree * qt)
 {
 	struct vec2 dist;
-	double_t dist_magnitude;
+	float_t dist_magnitude;
 	dist_magnitude = get_node_dist(rb, qt, &dist);
 	if (dist_magnitude == 0) return;
 
@@ -66,7 +66,7 @@ int bh86_apply_gravity_forces_ptr_arr_iter(struct rb_ptr_array_iter * bodies)
 	quadtree_delete(qt);
 	// struct rigidbody *a, *b;
 	// struct vec2 dist;
-	// double_t dist_magnitude;
+	// float_t dist_magnitude;
 	// for (struct rb_shape_base ** i = bodies->start; i < bodies->end;
 	//      i = (struct rb_shape_base **)((int8_t *)i + bodies->step))
 	// {

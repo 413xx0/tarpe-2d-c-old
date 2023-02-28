@@ -13,7 +13,7 @@
 	} while (0);
 
 
-struct rb_circle * rb_circle_new(double_t radius, _RB_INIT_ARGS)
+struct rb_circle * rb_circle_new(float_t radius, _RB_INIT_ARGS)
 {
 	struct rb_circle * circ = malloc(sizeof(struct rb_circle));
 	if (circ != NULL)
@@ -38,7 +38,7 @@ struct rb_circle * rb_circle_copy(struct rb_circle * src)
 void rb_circle_delete(struct rb_circle * circ) { free(circ); }
 
 
-struct rb_rectangle * rb_rectangle_new(double_t width, double_t height, _RB_INIT_ARGS)
+struct rb_rectangle * rb_rectangle_new(float_t width, float_t height, _RB_INIT_ARGS)
 {
 	struct rb_rectangle * rect = malloc(sizeof(struct rb_rectangle));
 	if (rect != NULL)

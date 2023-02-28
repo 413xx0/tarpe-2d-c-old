@@ -17,8 +17,8 @@ static inline int quadtree_divide(struct quadtree * qt)
 	qt->childs = malloc(sizeof(struct quadtree) * 4);
 	if (qt->childs == NULL) return 1;
 
-	double_t half_size = qt->size / 2;
-	double_t dp_x = -half_size / 2, dp_y = dp_x;
+	float_t half_size = qt->size / 2;
+	float_t dp_x = -half_size / 2, dp_y = dp_x;
 	for (size_t i = 0; i < 4; ++i)
 	{
 		qt->childs[i].pos.x = qt->pos.x + dp_x;
@@ -80,12 +80,12 @@ void quadtree_compute_centers_of_mass(struct quadtree * qt)
 }
 
 
-static inline struct quadtree * quadtree_make_root(struct vec2 * pos, double_t max_axis_dist)
+static inline struct quadtree * quadtree_make_root(struct vec2 * pos, float_t max_axis_dist)
 {
 	struct quadtree * qt = malloc(sizeof(struct quadtree));
 	if (qt == NULL) return NULL;
 
-	double_t size = 1;
+	float_t size = 1;
 	// if (max_axis_dist <= 0.25)
 	while (size >= 4 * max_axis_dist) size /= 2;
 	// if (max_axis_dist > 0.5)
@@ -102,7 +102,7 @@ static inline struct quadtree * quadtree_make_root(struct vec2 * pos, double_t m
 
 struct quadtree * quadtree_build_ptr_arr_iter(struct rb_ptr_array_iter * bodies)
 {
-	double_t d;
+	float_t d;
 	struct vec2 pos = (struct vec2){0, 0}, max_dist = (struct vec2){0, 0};
 	for (struct rb_shape_base ** i = bodies->start; i < bodies->end;
 	     i = (struct rb_shape_base **)((int8_t *)i + bodies->step))
@@ -143,7 +143,7 @@ struct quadtree * quadtree_build_uni_iter(struct rb_uni_iter * bodies)
 	memset(userdata, 0, bodies->userdata_size);
 	if (userdata == NULL) return NULL;
 
-	double_t d;
+	float_t d;
 	struct vec2 pos = (struct vec2){0, 0}, max_dist = (struct vec2){0, 0};
 	struct rb_shape_base * i = bodies->get_first(bodies->data_structure, userdata);
 	while (i != NULL)

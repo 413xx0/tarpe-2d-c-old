@@ -32,17 +32,17 @@ int tarpe2d_draw_poll_events(void);
 void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_count, bool do_flip);
 
 
-static inline double_t tarpe2d_draw_get_dt(uint64_t * frame_start)
+static inline float_t tarpe2d_draw_get_dt(uint64_t * frame_start)
 {
 	uint64_t end_time = SDL_GetPerformanceCounter();
-	double_t dt = (end_time - *frame_start) / (double_t)SDL_GetPerformanceFrequency();
+	float_t dt = (end_time - *frame_start) / (float_t)SDL_GetPerformanceFrequency();
 	*frame_start = end_time;
 	return dt;
 }
 
-static inline void tarpe2d_draw_wait_until_min_dt(double_t min_dt, uint64_t frame_start)
+static inline void tarpe2d_draw_wait_until_min_dt(float_t min_dt, uint64_t frame_start)
 {
-	while ((SDL_GetPerformanceCounter() - frame_start) / (double_t)SDL_GetPerformanceFrequency()
+	while ((SDL_GetPerformanceCounter() - frame_start) / (float_t)SDL_GetPerformanceFrequency()
 	       < min_dt)
 		;
 }

@@ -20,10 +20,10 @@ enum quadtree_node_state
 struct quadtree
 {
 	struct vec2 pos;
-	double_t size;
+	float_t size;
 	enum quadtree_node_state state;
 
-	double_t total_mass;
+	float_t total_mass;
 	struct vec2 center_of_mass; // NOT valid when quadtree is building
 	struct rigidbody * rb; // valid only for state == _BH86_QTSTATE_FULL
 

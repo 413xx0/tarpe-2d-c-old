@@ -54,8 +54,7 @@ int tarpe2d_draw_poll_events(void)
 	SDL_Event ev;
 	while (SDL_PollEvent(&ev))
 	{
-		if (ev.type == SDL_QUIT)
-			return 1;
+		if (ev.type == SDL_QUIT) return 1;
 	}
 	return 0;
 }
@@ -72,13 +71,13 @@ void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_
 	float vertices[8];
 	struct vec2 rot_half_width, rot_half_height;
 	struct vec2 left, right, tmp, pos;
-	double_t sin_rot, cos_rot, radius;
+	float_t sin_rot, cos_rot, radius;
 	bool flag;
-	double_t w_min = 0, w_max = screen->w, h_min = 0, h_max = screen->h;
+	float_t w_min = 0, w_max = screen->w, h_min = 0, h_max = screen->h;
 	if (GPU_IsCameraEnabled(screen))
 	{
-		double_t dw = screen->w * (1 / screen->camera.zoom_x - 1) / 2,
-			 dh = screen->h * (1 / screen->camera.zoom_y - 1) / 2;
+		float_t dw = screen->w * (1 / screen->camera.zoom_x - 1) / 2,
+			dh = screen->h * (1 / screen->camera.zoom_y - 1) / 2;
 		w_min -= dw;
 		w_max += dw;
 		h_min -= dh;

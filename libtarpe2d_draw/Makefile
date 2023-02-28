@@ -15,7 +15,7 @@ LIB_TARGET_STATIC = $(LIB_DIR)/$(NAME).a
 _DIRS_MAY_NOT_EXIST = $(OBJ_DIR) $(LIB_DIR)
 
 
-OPT = -g
+OPT = -Ofast
 WARN_CONF = -Wall -Wextra -Wpedantic -Werror
 STD = -std=c17
 CFLAGS = $(INCLUDES) $(OPT) $(WARN_CONF) $(STD)

@@ -8,8 +8,8 @@
 
 struct tarpe_config
 {
-	double_t grav_const;
-	double_t bh86_threshold;
+	float_t grav_const;
+	float_t bh86_threshold;
 };
 
 
