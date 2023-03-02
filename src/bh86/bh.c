@@ -21,12 +21,12 @@ static inline float_t get_node_dist(struct rigidbody * rb, struct quadtree * nod
 	return vec2_abs(dist);
 }
 
-void body_apply_gravity_forces(struct rigidbody * rb, struct quadtree * qt)
+unsigned int body_apply_gravity_forces(struct rigidbody * rb, struct quadtree * qt)
 {
 	struct vec2 dist;
 	float_t dist_magnitude;
 	dist_magnitude = get_node_dist(rb, qt, &dist);
-	if (dist_magnitude == 0) return;
+	if (dist_magnitude == 0) return 0;
 
 	if (qt->state & _BH86_QTSTATE_FULL)
 	{
@@ -47,67 +47,26 @@ void body_apply_gravity_forces(struct rigidbody * rb, struct quadtree * qt)
 			}
 		}
 	}
-}
 
-
-int bh86_apply_gravity_forces_ptr_arr_iter(struct rb_ptr_array_iter * bodies)
-{
-	struct quadtree * qt;
-	qt = quadtree_build_ptr_arr_iter(bodies);
-	if (qt == NULL) return 1;
-	if (qt->state == _BH86_QTSTATE_EMPTY) return 0;
-
-	for (struct rb_shape_base ** i = bodies->start; i < bodies->end;
-	     i = (struct rb_shape_base **)((int8_t *)i + bodies->step))
-	{
-		body_apply_gravity_forces((struct rigidbody *)*i, qt);
-	}
-
-	quadtree_delete(qt);
-	// struct rigidbody *a, *b;
-	// struct vec2 dist;
-	// float_t dist_magnitude;
-	// for (struct rb_shape_base ** i = bodies->start; i < bodies->end;
-	//      i = (struct rb_shape_base **)((int8_t *)i + bodies->step))
-	// {
-	// 	for (struct rb_shape_base ** j = (struct rb_shape_base **)((int8_t *)i + bodies->step);
-	// 	     j < bodies->end;
-	// 	     j = (struct rb_shape_base **)((int8_t *)j + bodies->step))
-	// 	{
-	// 		a = (struct rigidbody *)*i;
-	// 		b = (struct rigidbody *)*j;
-	// 		vec2_sub(&b->pos, &a->pos, &dist);
-	// 		dist_magnitude = vec2_abs(&dist);
-	// 		body_apply_node_force(a, &dist, dist_magnitude, b->mass);
-	// 		vec2_neg(&dist, &dist);
-	// 		body_apply_node_force(b, &dist, dist_magnitude, a->mass);
-	// 	}
-	// }
 	return 0;
 }
 
-int bh86_apply_gravity_forces_uni_iter(struct rb_uni_iter * bodies)
+unsigned int step_func_body_apply_gravity_forces(struct rb_shape_base * __rbs, void * __qt)
 {
-	struct quadtree * qt;
-	qt = quadtree_build_uni_iter(bodies);
+	struct quadtree * qt = __qt;
+	struct rigidbody * rb = (struct rigidbody *)__rbs;
+
+	return body_apply_gravity_forces(rb, qt);
+}
+
+
+int bh86_apply_gravity_forces(struct rbs_iter * bodies)
+{
+	struct quadtree * qt = quadtree_build(bodies);
 	if (qt == NULL) return 1;
 	if (qt->state == _BH86_QTSTATE_EMPTY) return 0;
 
-	void * userdata = malloc(bodies->userdata_size);
-	memset(userdata, 0, bodies->userdata_size);
-	if (userdata == NULL)
-	{
-		quadtree_delete(qt);
-		return 1;
-	}
-
-	struct rb_shape_base * i = bodies->get_first(bodies->data_structure, userdata);
-	while (i != NULL)
-	{
-		body_apply_gravity_forces((struct rigidbody *)i, qt);
-
-		i = bodies->get_next(userdata);
-	}
+	bodies->iter_func(bodies->data_structure, step_func_body_apply_gravity_forces, qt);
 
 	quadtree_delete(qt);
 	return 0;

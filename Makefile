@@ -44,7 +44,7 @@ _DIRS_MAY_NOT_EXIST = $(BIN_DIR) $(_MAIN_OBJ_DIR) $(OBJ_DIRS) $(LIB_DIR)
 
 
 
-OPT = -Ofast
+OPT = -g
 WARN_CONF = -Wall -Wextra -Wpedantic -Werror
 STD = -std=c17
 CFLAGS = $(INCLUDES) $(OPT) $(WARN_CONF) $(STD)

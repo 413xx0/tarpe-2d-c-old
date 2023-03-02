@@ -5,8 +5,11 @@
 #include <stdint.h>
 
 
-static inline void tick_rigidbody(struct rigidbody * rb, float_t dt)
+unsigned int tick_rigidbody(struct rb_shape_base * __rbs, void * __dt)
 {
+	struct rigidbody * rb = (struct rigidbody *)__rbs;
+	float_t dt = *((float_t *)__dt);
+
 	struct vec2 tmp;
 	vec2_mul(&rb->tick_force, rb->inv_mass * dt, &tmp); // tmp = a * dt
 
@@ -21,33 +24,14 @@ static inline void tick_rigidbody(struct rigidbody * rb, float_t dt)
 
 	vec2_nullify(&rb->tick_force);
 	rb->torque = 0;
-}
 
-int tarpe_tick_ptr_arr_iter(struct rb_ptr_array_iter * iter, float_t dt)
-{
-	if (bh86_apply_gravity_forces_ptr_arr_iter(iter)) return 1;
-
-	for (struct rb_shape_base ** i = iter->start; i < iter->end;
-	     i = (struct rb_shape_base **)((int8_t *)i + iter->step))
-	{
-		tick_rigidbody(&((*i)->rb), dt);
-	}
 	return 0;
 }
 
-int tarpe_tick_uni_iter(struct rb_uni_iter * iter, float_t dt)
+int tarpe_tick(struct rbs_iter * bodies, float_t dt)
 {
-	if (bh86_apply_gravity_forces_uni_iter(iter)) return 1;
+	int bh86_err;
+	if ((bh86_err = bh86_apply_gravity_forces(bodies))) return bh86_err;
 
-	void * userdata = malloc(iter->userdata_size);
-	if (userdata == NULL) return 1;
-	memset(userdata, 0, iter->userdata_size);
-
-	struct rb_shape_base * i = iter->get_first(iter->data_structure, userdata);
-	while (i != NULL)
-	{
-		tick_rigidbody(&(i->rb), dt);
-		i = iter->get_next(userdata);
-	}
-	return 0;
+	return bodies->iter_func(bodies->data_structure, tick_rigidbody, &dt);
 }

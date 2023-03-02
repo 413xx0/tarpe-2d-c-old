@@ -6,7 +6,7 @@
 #define WIDTH 1280
 #define HEIGHT 720
 // /*
-#define SHAPES_DIST 5
+#define SHAPES_DIST 25
 #define _SIDE_SHAPES_COUNT(SIDE_LEN) \
 	((SIDE_LEN + 1) / SHAPES_DIST + ((SIDE_LEN + 1) % SHAPES_DIST == 0 ? 0 : 1))
 #define SHAPES_ROW_COUNT (_SIDE_SHAPES_COUNT(WIDTH))
@@ -17,12 +17,16 @@
 #define NO_VSYNC
 
 #ifdef NO_VSYNC
+// Define here any fps you want
 #	define MAX_FPS 60
-#	define MIN_DT (1. / MAX_FPS)
+#else
+// There MUST be 60
+#	define MAX_FPS 60
 #endif
+#define MIN_DT (1. / MAX_FPS)
 
-// #define SAVE_TRAJS
-// #define SECS_TO_SAVE_TRAJS 65
+#define SAVE_TRAJS
+#define SECS_TO_SAVE_TRAJS 65
 
 
 #define shape_check_null(shape_ptr, ret, cleanup_label)                    \
@@ -34,6 +38,20 @@
 			goto cleanup_label;                                \
 		}                                                          \
 	} while (0);
+
+
+int rbs_array_iter(void * data_structure, rbs_iter_step_func_pt step_func, void * step_func_data)
+{
+	struct shape * shapes = data_structure;
+
+	int step_func_err;
+	for (struct shape * iter = shapes; iter < shapes + SHAPES_COUNT; ++iter)
+	{
+		if ((step_func_err = step_func(iter->rb_shape, step_func_data))) return step_func_err;
+	}
+
+	return 0;
+}
 
 
 int main(void)
@@ -102,11 +120,10 @@ int main(void)
 	// 	0, 0
 	// );
 
-	struct rb_ptr_array_iter iter = (struct rb_ptr_array_iter){
-		.start = (struct rb_shape_base **)((int8_t *)shapes + offsetof(struct shape, rb_shape)),
-		.step = sizeof(struct shape),
-		.end = (struct rb_shape_base **)(shapes + SHAPES_COUNT),
-		.rb_count = SHAPES_COUNT
+	struct rbs_iter iter = {
+		.data_structure = shapes,
+		.iter_func = rbs_array_iter,
+		.size = SHAPES_COUNT
 	};
 
 	// clang-format on
@@ -156,7 +173,7 @@ int main(void)
 		}
 #endif
 
-		if (tarpe_tick_ptr_arr_iter(&iter, dt / 16))
+		if (tarpe_tick(&iter, dt / 128))
 		{
 			printf("Couldn't allocate memory to tick rigidbodies!\n");
 			ret = ENOMEM;
