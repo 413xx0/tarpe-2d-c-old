@@ -18,12 +18,12 @@ struct rb_circle * rb_circle_new(float_t radius, _RB_INIT_ARGS)
 	struct rb_circle * circ = malloc(sizeof(struct rb_circle));
 	if (circ != NULL)
 	{
-		circ->radius = radius;
-		circ->base.type = TARPE__RB_SHAPE_TYPE__CIRCLE;
+		circ->circle.radius = radius;
+		circ->base.type = TARPE__SHAPE_TYPE__CIRCLE;
 
 		_SET_RB_INIT_ARGS(circ->base.rb);
 		circ->base.rb.inv_moment_of_inertia =
-			2 / (circ->base.rb.mass * circ->radius * circ->radius);
+			2 / (circ->base.rb.mass * circ->circle.radius * circ->circle.radius);
 	}
 	return circ;
 }
@@ -43,15 +43,13 @@ struct rb_rectangle * rb_rectangle_new(float_t width, float_t height, _RB_INIT_A
 	struct rb_rectangle * rect = malloc(sizeof(struct rb_rectangle));
 	if (rect != NULL)
 	{
-		rect->side_sizes = (struct vec2){.x = width, .y = height};
-		rect->half_side_sizes = (struct vec2){.x = width / 2, .y = height / 2};
-		rect->base.type = TARPE__RB_SHAPE_TYPE__RECTANGLE;
+		// rect->rect.side_sizes = (struct vec2){.x = width, .y = height};
+		rect->rect.half_side_sizes = (struct vec2){.x = width / 2, .y = height / 2};
+		rect->base.type = TARPE__SHAPE_TYPE__RECTANGLE;
 
 		_SET_RB_INIT_ARGS(rect->base.rb);
-		rect->base.rb.inv_moment_of_inertia = 12
-						      / (rect->base.rb.mass
-							 * (rect->side_sizes.x * rect->side_sizes.x
-							    + rect->side_sizes.y * rect->side_sizes.y));
+		rect->base.rb.inv_moment_of_inertia =
+			12 / (rect->base.rb.mass * (width * width + height * height));
 	}
 	return rect;
 }

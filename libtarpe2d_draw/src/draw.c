@@ -85,9 +85,9 @@ void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_
 	}
 	for (struct shape * i = shapes_arr; i < shapes_arr + shapes_count; ++i)
 	{
-		if (i->rb_shape->type == TARPE__RB_SHAPE_TYPE__CIRCLE)
+		if (i->rb_shape->type == TARPE__SHAPE_TYPE__CIRCLE)
 		{
-			radius = ((struct rb_circle *)(i->rb_shape))->radius;
+			radius = ((struct rb_circle *)(i->rb_shape))->circle.radius;
 			pos.x = i->rb_shape->rb.pos.x;
 			pos.y = i->rb_shape->rb.pos.y;
 			if ((pos.x + radius >= w_min && pos.x - radius <= w_max)
@@ -103,13 +103,14 @@ void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_
 			sin_rot = sin(i->rb_shape->rb.angle);
 			cos_rot = cos(i->rb_shape->rb.angle);
 			rot_half_width = (struct vec2){
-				.x = ((struct rb_rectangle *)(i->rb_shape))->half_side_sizes.x * cos_rot,
-				.y = ((struct rb_rectangle *)(i->rb_shape))->half_side_sizes.x
+				.x = ((struct rb_rectangle *)(i->rb_shape))->rect.half_side_sizes.x
+				     * cos_rot,
+				.y = ((struct rb_rectangle *)(i->rb_shape))->rect.half_side_sizes.x
 				     * sin_rot};
 			rot_half_height = (struct vec2){
-				.x = ((struct rb_rectangle *)(i->rb_shape))->half_side_sizes.y
+				.x = ((struct rb_rectangle *)(i->rb_shape))->rect.half_side_sizes.y
 				     * -sin_rot,
-				.y = ((struct rb_rectangle *)(i->rb_shape))->half_side_sizes.y
+				.y = ((struct rb_rectangle *)(i->rb_shape))->rect.half_side_sizes.y
 				     * cos_rot};
 
 			vec2_add(&i->rb_shape->rb.pos, &rot_half_width, &right);
