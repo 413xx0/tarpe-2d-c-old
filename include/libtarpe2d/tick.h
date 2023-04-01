@@ -2,10 +2,10 @@
 #define __TICK_LIBTARPE2D_H__
 
 
-#include <libtarpe2d/rb_shape_iter.h>
+#include <libtarpe2d/rb_shape_array.h>
 
 
-int tarpe_tick(struct rbs_iter * bodies, float_t dt);
+int tarpe_tick(struct rbs_array * bodies, float_t dt);
 
 
 #endif /*__TICK_LIBTARPE2D_H__*/

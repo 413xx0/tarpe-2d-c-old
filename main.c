@@ -47,20 +47,6 @@
 	} while (0);
 
 
-int rbs_array_iter(void * data_structure, rbs_iter_step_func_pt step_func, void * step_func_data)
-{
-	struct shape * shapes = data_structure;
-
-	int step_func_err;
-	for (struct shape * iter = shapes; iter < shapes + SHAPES_COUNT; ++iter)
-	{
-		if ((step_func_err = step_func(iter->rb_shape, step_func_data))) return step_func_err;
-	}
-
-	return 0;
-}
-
-
 int main(void)
 {
 	printf("%d\n", SHAPES_COUNT);
@@ -130,9 +116,13 @@ int main(void)
 	);
 #endif /*PLANETARY_SYSTEM*/
 
-	struct rbs_iter iter = {
-		.data_structure = shapes,
-		.iter_func = rbs_array_iter,
+	struct rb_shape_base ** __rbs_arr = malloc(sizeof(struct rb_shape_base *) * SHAPES_COUNT);
+	for (size_t i = 0; i < SHAPES_COUNT; ++i)
+	{
+		__rbs_arr[i] = shapes[i].rb_shape;
+	}
+	struct rbs_array rbs_arr = {
+		.shapes = __rbs_arr,
 		.size = SHAPES_COUNT
 	};
 
@@ -185,7 +175,7 @@ int main(void)
 
 		for (int64_t i = 0; i < TICKS_PER_FRAME; ++i)
 		{
-			if (tarpe_tick(&iter, dt * DT_COEF))
+			if (tarpe_tick(&rbs_arr, dt * DT_COEF))
 			{
 				printf("Couldn't allocate memory to tick rigidbodies!\n");
 				ret = ENOMEM;

@@ -5,11 +5,8 @@
 #include <stdint.h>
 
 
-unsigned int tick_rigidbody(struct rb_shape_base * __rbs, void * __dt)
+static inline void tick_rigidbody(struct rigidbody * rb, float_t dt)
 {
-	struct rigidbody * rb = (struct rigidbody *)__rbs;
-	float_t dt = *((float_t *)__dt);
-
 	struct vec2 tmp;
 	vec2_mul(&rb->tick_force, rb->inv_mass * dt, &tmp); // tmp = a * dt
 
@@ -24,14 +21,17 @@ unsigned int tick_rigidbody(struct rb_shape_base * __rbs, void * __dt)
 
 	vec2_nullify(&rb->tick_force);
 	rb->torque = 0;
-
-	return 0;
 }
 
-int tarpe_tick(struct rbs_iter * bodies, float_t dt)
+int tarpe_tick(struct rbs_array * bodies, float_t dt)
 {
 	int bh86_err;
 	if ((bh86_err = bh86_apply_gravity_forces(bodies))) return bh86_err;
 
-	return bodies->iter_func(bodies->data_structure, tick_rigidbody, &dt);
+	for (struct rb_shape_base ** rbs_ptr = bodies->shapes; rbs_ptr < bodies->shapes + bodies->size; ++rbs_ptr)
+	{
+		tick_rigidbody((struct rigidbody *)(*rbs_ptr), dt);
+	}
+
+	return 0;
 }

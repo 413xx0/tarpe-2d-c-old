@@ -1,4 +1,5 @@
 #include <libtarpe2d/bh86/bh.h>
+#include <libtarpe2d/bh86/quadtree.h>
 #include <libtarpe2d/config.h>
 #include <stdint.h>
 
@@ -21,12 +22,12 @@ static inline float_t get_node_dist(struct rigidbody * rb, struct quadtree * nod
 	return vec2_abs(dist);
 }
 
-unsigned int body_apply_gravity_forces(struct rigidbody * rb, struct quadtree * qt)
+void body_apply_gravity_forces(struct rigidbody * rb, struct quadtree * qt)
 {
 	struct vec2 dist;
 	float_t dist_magnitude;
 	dist_magnitude = get_node_dist(rb, qt, &dist);
-	if (dist_magnitude == 0) return 0;
+	if (dist_magnitude == 0) return;
 
 	if (qt->state & _BH86_QTSTATE_FULL)
 	{
@@ -47,26 +48,19 @@ unsigned int body_apply_gravity_forces(struct rigidbody * rb, struct quadtree * 
 			}
 		}
 	}
-
-	return 0;
-}
-
-unsigned int step_func_body_apply_gravity_forces(struct rb_shape_base * __rbs, void * __qt)
-{
-	struct quadtree * qt = __qt;
-	struct rigidbody * rb = (struct rigidbody *)__rbs;
-
-	return body_apply_gravity_forces(rb, qt);
 }
 
 
-int bh86_apply_gravity_forces(struct rbs_iter * bodies)
+int bh86_apply_gravity_forces(struct rbs_array * bodies)
 {
 	struct quadtree * qt = quadtree_build(bodies);
 	if (qt == NULL) return 1;
 	if (qt->state == _BH86_QTSTATE_EMPTY) return 0;
 
-	bodies->iter_func(bodies->data_structure, step_func_body_apply_gravity_forces, qt);
+	for (struct rb_shape_base ** rbs_ptr = bodies->shapes; rbs_ptr < bodies->shapes + bodies->size; ++rbs_ptr)
+	{
+		body_apply_gravity_forces((struct rigidbody *)(*rbs_ptr), qt);
+	}
 
 	quadtree_delete(qt);
 	return 0;

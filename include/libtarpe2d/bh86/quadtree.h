@@ -2,7 +2,7 @@
 #define __LIBTARPE2D_BH86_QUADTREE_H__
 
 
-#include <libtarpe2d/rb_shape_iter.h>
+#include <libtarpe2d/rb_shape_array.h>
 #include <libtarpe2d/rigidbody.h>
 #include <libtarpe2d/vec2.h>
 #include <stddef.h>
@@ -31,7 +31,7 @@ struct quadtree
 };
 
 
-struct quadtree * quadtree_build(struct rbs_iter * bodies);
+struct quadtree * quadtree_build(struct rbs_array * bodies);
 
 
 void quadtree_delete(struct quadtree * qt);
