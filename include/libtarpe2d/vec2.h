@@ -2,6 +2,7 @@
 #define __LIBTARPE2d_VEC2_H__
 
 
+#include <libtarpe2d/math_utils.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,9 +37,9 @@ static inline void vec2_neg(struct vec2 * v, struct vec2 * out)
 	out->y = -v->y;
 }
 
-static inline float_t vec2_sqr_abs(struct vec2 * v) { return v->x * v->x + v->y * v->y; }
+static inline float_t vec2_sqr_abs(struct vec2 * v) { return flt_squared(v->x) + flt_squared(v->y); }
 
-static inline float_t vec2_abs(struct vec2 * v) { return sqrt(v->x * v->x + v->y * v->y); }
+static inline float_t vec2_abs(struct vec2 * v) { return sqrt(vec2_sqr_abs(v)); }
 
 static inline void vec2_add(struct vec2 * v, struct vec2 * u, struct vec2 * out)
 {
@@ -95,9 +96,7 @@ static inline float_t vec2_sqr_dist(struct vec2 * start, struct vec2 * end)
 
 static inline float_t vec2_dist(struct vec2 * start, struct vec2 * end)
 {
-	struct vec2 tmp;
-	vec2_sub(end, start, &tmp);
-	return vec2_abs(&tmp);
+	return sqrt(vec2_sqr_dist(start, end));
 }
 
 

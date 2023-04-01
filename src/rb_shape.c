@@ -1,3 +1,4 @@
+#include <libtarpe2d/math_utils.h>
 #include <libtarpe2d/rb_shape.h>
 #include <string.h>
 
@@ -23,7 +24,7 @@ struct rb_circle * rb_circle_new(float_t radius, _RB_INIT_ARGS)
 
 		_SET_RB_INIT_ARGS(circ->base.rb);
 		circ->base.rb.inv_moment_of_inertia =
-			2 / (circ->base.rb.mass * circ->circle.radius * circ->circle.radius);
+			2 / (circ->base.rb.mass * flt_squared(circ->circle.radius));
 	}
 	return circ;
 }
@@ -49,7 +50,7 @@ struct rb_rectangle * rb_rectangle_new(float_t width, float_t height, _RB_INIT_A
 
 		_SET_RB_INIT_ARGS(rect->base.rb);
 		rect->base.rb.inv_moment_of_inertia =
-			12 / (rect->base.rb.mass * (width * width + height * height));
+			12 / (rect->base.rb.mass * (flt_squared(width) + flt_squared(height)));
 	}
 	return rect;
 }

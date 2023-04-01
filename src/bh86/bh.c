@@ -57,7 +57,8 @@ int bh86_apply_gravity_forces(struct rbs_array * bodies)
 	if (qt == NULL) return 1;
 	if (qt->state == _BH86_QTSTATE_EMPTY) return 0;
 
-	for (struct rb_shape_base ** rbs_ptr = bodies->shapes; rbs_ptr < bodies->shapes + bodies->size; ++rbs_ptr)
+	for (struct rb_shape_base ** rbs_ptr = bodies->shapes; rbs_ptr < bodies->shapes + bodies->size;
+	     ++rbs_ptr)
 	{
 		body_apply_gravity_forces((struct rigidbody *)(*rbs_ptr), qt);
 	}
