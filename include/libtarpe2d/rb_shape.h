@@ -9,9 +9,26 @@
 #include <tgmath.h>
 
 
+struct aabb
+{
+	float_t x_min, x_max;
+	float_t y_min, y_max;
+};
+
+static inline void
+aabb_init(struct aabb * aabb, struct vec2 * pos, float_t half_width, float_t half_height)
+{
+	aabb->x_min = pos->x - half_width;
+	aabb->x_max = pos->x + half_width;
+	aabb->y_min = pos->y - half_height;
+	aabb->y_max = pos->y + half_height;
+}
+
+
 struct rb_shape_base
 {
 	struct rigidbody rb;
+	struct aabb aabb;
 	enum tarpe_shape_type type;
 };
 
@@ -47,6 +64,8 @@ struct rb_rectangle * rb_rectangle_new(float_t width, float_t height, _RB_INIT_A
 struct rb_rectangle * rb_rectangle_copy(struct rb_rectangle * rect);
 
 void rb_rectangle_delete(struct rb_rectangle * rect);
+
+void rb_rectangle_get_vertices(struct rb_rectangle * rect, struct vec2 vertices_out[4]);
 
 
 void rb_shape_delete(struct rb_shape_base * shape);

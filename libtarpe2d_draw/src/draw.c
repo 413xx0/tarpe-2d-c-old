@@ -69,9 +69,9 @@ void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_
 	GPU_Clear(screen);
 
 	float vertices[8];
-	struct vec2 rot_half_width, rot_half_height;
-	struct vec2 left, right, tmp, pos;
-	float_t sin_rot, cos_rot, radius;
+	struct vec2 vec2_vertices[4];
+	struct vec2 pos;
+	float_t radius;
 	bool flag;
 	float_t w_min = 0, w_max = screen->w, h_min = 0, h_max = screen->h;
 	if (GPU_IsCameraEnabled(screen))
@@ -100,51 +100,19 @@ void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_
 		}
 		else
 		{
-			sin_rot = sin(i->rb_shape->rb.angle);
-			cos_rot = cos(i->rb_shape->rb.angle);
-			rot_half_width = (struct vec2){
-				.x = ((struct rb_rectangle *)(i->rb_shape))->rect.half_side_sizes.x
-				     * cos_rot,
-				.y = ((struct rb_rectangle *)(i->rb_shape))->rect.half_side_sizes.x
-				     * sin_rot};
-			rot_half_height = (struct vec2){
-				.x = ((struct rb_rectangle *)(i->rb_shape))->rect.half_side_sizes.y
-				     * -sin_rot,
-				.y = ((struct rb_rectangle *)(i->rb_shape))->rect.half_side_sizes.y
-				     * cos_rot};
-
-			vec2_add(&i->rb_shape->rb.pos, &rot_half_width, &right);
-			vec2_sub(&i->rb_shape->rb.pos, &rot_half_width, &left);
-
-			// vert 1
-			vec2_add(&left, &rot_half_height, &tmp);
-			vec2_to_arr(vertices, 0, 1, tmp);
-
-			// vert 2
-			vec2_add(&right, &rot_half_height, &tmp);
-			vec2_to_arr(vertices, 2, 3, tmp);
-
-			// vert 3
-			vec2_sub(&right, &rot_half_height, &tmp);
-			vec2_to_arr(vertices, 4, 5, tmp);
-
-			// vert 4
-			vec2_sub(&left, &rot_half_height, &tmp);
-			vec2_to_arr(vertices, 6, 7, tmp);
+			rb_rectangle_get_vertices((struct rb_rectangle *)i->rb_shape, vec2_vertices);
 
 			flag = false;
-			for (int i = 0; i < 8; i += 2)
+			for (int i = 0; i < 4; ++i)
 			{
-				pos.x = vertices[i];
-				pos.y = vertices[i + 1];
-				if ((pos.x >= w_min && pos.x <= w_max)
-				    && (pos.y >= h_min && pos.y <= h_max))
-				{
+				pos = vec2_vertices[i];
+				vertices[i * 2] = pos.x;
+				vertices[i * 2 + 1] = screen->h - pos.y;
+				if (!flag
+				    || ((pos.x >= w_min && pos.x <= w_max)
+					&& (pos.y >= h_min && pos.y <= h_max)))
 					flag = true;
-					break;
-				}
 			}
-			for (int i = 1; i < 8; i += 2) vertices[i] = screen->h - vertices[i];
 
 			if (flag) GPU_PolygonFilled(screen, 4, vertices, i->color);
 		}
