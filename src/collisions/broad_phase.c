@@ -9,12 +9,12 @@
 
 static inline int is_colliding_aabb_aabb_x(struct rb_shape_base * body_1, struct rb_shape_base * body_2)
 {
-	return body_1->aabb.x_min <= body_2->aabb.x_max && body_2->aabb.x_min <= body_1->aabb.x_max;
+	return body_1->aabb.x_min < body_2->aabb.x_max && body_2->aabb.x_min < body_1->aabb.x_max;
 }
 
 static inline int is_colliding_aabb_aabb_y(struct rb_shape_base * body_1, struct rb_shape_base * body_2)
 {
-	return body_1->aabb.y_min <= body_2->aabb.y_max && body_2->aabb.y_min <= body_1->aabb.y_max;
+	return body_1->aabb.y_min < body_2->aabb.y_max && body_2->aabb.y_min < body_1->aabb.y_max;
 }
 
 
