@@ -69,7 +69,6 @@ void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_
 	GPU_Clear(screen);
 
 	float vertices[8];
-	struct vec2 vec2_vertices[4];
 	struct vec2 pos;
 	float_t radius;
 	bool flag;
@@ -100,14 +99,12 @@ void tarpe2d_draw(GPU_Target * screen, struct shape * shapes_arr, size_t shapes_
 		}
 		else
 		{
-			rb_rectangle_get_vertices((struct rb_rectangle *)i->rb_shape, vec2_vertices);
-
 			flag = false;
-			for (int i = 0; i < 4; ++i)
+			for (int j = 0; j < 4; ++j)
 			{
-				pos = vec2_vertices[i];
-				vertices[i * 2] = pos.x;
-				vertices[i * 2 + 1] = screen->h - pos.y;
+				pos = ((struct rb_rectangle *)i->rb_shape)->vertices[j];
+				vertices[j * 2] = pos.x;
+				vertices[j * 2 + 1] = screen->h - pos.y;
 				if (!flag
 				    || ((pos.x >= w_min && pos.x <= w_max)
 					&& (pos.y >= h_min && pos.y <= h_max)))

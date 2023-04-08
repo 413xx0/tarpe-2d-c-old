@@ -28,9 +28,16 @@ int tarpe_tick(struct rbs_array * bodies, float_t dt)
 	int bh86_err;
 	if ((bh86_err = bh86_apply_gravity_forces(bodies))) return bh86_err;
 
-	for (struct rb_shape_base ** rbs_ptr = bodies->shapes; rbs_ptr < bodies->shapes + bodies->size; ++rbs_ptr)
+	for (struct rb_shape_base ** rbs_ptr = bodies->shapes; rbs_ptr < bodies->shapes + bodies->size;
+	     ++rbs_ptr)
 	{
 		tick_rigidbody((struct rigidbody *)(*rbs_ptr), dt);
+
+		if ((*rbs_ptr)->type == TARPE__SHAPE_TYPE__RECTANGLE)
+		{
+			rb_rectangle_update_vertices((struct rb_rectangle *)(*rbs_ptr));
+			rb_rectangle_update_normals((struct rb_rectangle *)(*rbs_ptr));
+		}
 	}
 
 	return 0;

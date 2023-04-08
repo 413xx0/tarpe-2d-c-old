@@ -10,6 +10,7 @@
 
 #include <libtarpe2d/config.h>
 #include <libtarpe2d/math_utils.h>
+#include <libtarpe2d/projection.h>
 #include <libtarpe2d/rb_shape.h>
 #include <libtarpe2d/rb_shape_array.h>
 #include <libtarpe2d/rigidbody.h>

@@ -23,12 +23,11 @@ struct rb_circle * rb_circle_new(float_t radius, _RB_INIT_ARGS)
 		_SET_RB_INIT_ARGS(circ->base.rb);
 		circ->base.rb.inv_moment_of_inertia =
 			2 / (circ->base.rb.mass * flt_squared(circ->circle.radius));
+		circ->base.type = TARPE__SHAPE_TYPE__CIRCLE;
 
 		circ->circle.radius = radius;
 
 		aabb_init(&(circ->base.aabb), start_pos, radius, radius);
-
-		circ->base.type = TARPE__SHAPE_TYPE__CIRCLE;
 	}
 	return circ;
 }
@@ -51,13 +50,15 @@ struct rb_rectangle * rb_rectangle_new(float_t width, float_t height, _RB_INIT_A
 		_SET_RB_INIT_ARGS(rect->base.rb);
 		rect->base.rb.inv_moment_of_inertia =
 			12 / (rect->base.rb.mass * (flt_squared(width) + flt_squared(height)));
+		rect->base.type = TARPE__SHAPE_TYPE__RECTANGLE;
 
 		rect->rect.half_side_sizes = (struct vec2){.x = width / 2, .y = height / 2};
 
 		float_t aabb_side = vec2_abs(&rect->rect.half_side_sizes);
 		aabb_init(&(rect->base.aabb), start_pos, aabb_side, aabb_side);
 
-		rect->base.type = TARPE__SHAPE_TYPE__RECTANGLE;
+		rb_rectangle_update_vertices(rect);
+		rb_rectangle_update_normals(rect);
 	}
 	return rect;
 }
@@ -71,7 +72,7 @@ struct rb_rectangle * rb_rectangle_copy(struct rb_rectangle * src)
 
 void rb_rectangle_delete(struct rb_rectangle * rect) { free(rect); }
 
-void rb_rectangle_get_vertices(struct rb_rectangle * rect, struct vec2 vertices_out[4])
+void rb_rectangle_update_vertices(struct rb_rectangle * rect)
 {
 	float_t sin_rot = sin(rect->base.rb.angle);
 	float_t cos_rot = cos(rect->base.rb.angle);
@@ -84,10 +85,30 @@ void rb_rectangle_get_vertices(struct rb_rectangle * rect, struct vec2 vertices_
 	vec2_add(&rect->base.rb.pos, &rot_half_width, &right);
 	vec2_sub(&rect->base.rb.pos, &rot_half_width, &left);
 
-	vec2_add(&left, &rot_half_height, vertices_out);
-	vec2_add(&right, &rot_half_height, vertices_out + 1);
-	vec2_sub(&right, &rot_half_height, vertices_out + 2);
-	vec2_sub(&left, &rot_half_height, vertices_out + 3);
+	vec2_add(&left, &rot_half_height, rect->vertices);
+	vec2_add(&right, &rot_half_height, rect->vertices + 1);
+	vec2_sub(&right, &rot_half_height, rect->vertices + 2);
+	vec2_sub(&left, &rot_half_height, rect->vertices + 3);
+}
+
+static inline void get_left_normal(struct vec2 * vec, struct vec2 * out_normal)
+{
+	*out_normal = (struct vec2){.x = vec->y, .y = -vec->x};
+	vec2_norm(out_normal, out_normal);
+}
+
+void rb_rectangle_update_normals(struct rb_rectangle * rect)
+{
+	struct vec2 side;
+
+	vec2_sub(rect->vertices + 1, rect->vertices, &side);
+	get_left_normal(&side, rect->normals);
+
+	vec2_sub(rect->vertices + 2, rect->vertices + 1, &side);
+	get_left_normal(&side, rect->normals + 1);
+
+	vec2_neg(rect->normals, rect->normals + 2);
+	vec2_neg(rect->normals + 1, rect->normals + 3);
 }
 
 

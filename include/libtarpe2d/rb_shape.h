@@ -2,6 +2,7 @@
 #define __LIBTARPE2D_RB_SHAPE_H__
 
 
+#include <libtarpe2d/projection.h>
 #include <libtarpe2d/rigidbody.h>
 #include <libtarpe2d/shape.h>
 #include <libtarpe2d/vec2.h>
@@ -53,10 +54,21 @@ struct rb_circle * rb_circle_copy(struct rb_circle * circle);
 void rb_circle_delete(struct rb_circle * circ);
 
 
+static inline void
+rb_circle_project(struct rb_circle * circ, struct vec2 * normalized_vec, struct projection * proj_out)
+{
+	float_t center_proj = vec2_dot(&(circ->base.rb.pos), normalized_vec);
+	*proj_out = (struct projection){
+		.min = center_proj - circ->circle.radius, .max = center_proj + circ->circle.radius};
+}
+
+
 struct rb_rectangle
 {
 	struct rb_shape_base base;
 	struct s_rectangle rect;
+	struct vec2 vertices[4];
+	struct vec2 normals[4];
 };
 
 struct rb_rectangle * rb_rectangle_new(float_t width, float_t height, _RB_INIT_ARGS);
@@ -65,7 +77,20 @@ struct rb_rectangle * rb_rectangle_copy(struct rb_rectangle * rect);
 
 void rb_rectangle_delete(struct rb_rectangle * rect);
 
-void rb_rectangle_get_vertices(struct rb_rectangle * rect, struct vec2 vertices_out[4]);
+
+void rb_rectangle_update_vertices(struct rb_rectangle * rect);
+
+void rb_rectangle_update_normals(struct rb_rectangle * rect);
+
+static inline void rb_rectangle_project(struct rb_rectangle * rect, struct vec2 * normalized_vec,
+					struct projection * proj_out)
+{
+	float_t center_proj = vec2_dot(&(rect->base.rb.pos), normalized_vec);
+	float_t delta =
+		rect->rect.half_side_sizes.x * fabs(vec2_dot(rect->normals + 1, normalized_vec))
+		+ rect->rect.half_side_sizes.y * fabs(vec2_dot(rect->normals + 2, normalized_vec));
+	*proj_out = (struct projection){.min = center_proj - delta, .max = center_proj + delta};
+}
 
 
 void rb_shape_delete(struct rb_shape_base * shape);
