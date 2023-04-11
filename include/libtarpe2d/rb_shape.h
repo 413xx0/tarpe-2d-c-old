@@ -34,11 +34,9 @@ struct rb_shape_base
 };
 
 
-// clang-format off
-#define _RB_INIT_ARGS                                                                                    \
-	float_t mass, struct vec2 * start_pos, struct vec2 * start_linear_velocity, float_t start_angle, \
-		float_t start_angular_velocity
-// clang-format on
+#define _RB_INIT_ARGS                                                                               \
+	float_t mass, float_t friction, struct vec2 *start_pos, struct vec2 *start_linear_velocity, \
+		float_t start_angle, float_t start_angular_velocity
 
 
 struct rb_circle
@@ -94,6 +92,9 @@ static inline void rb_rectangle_project(struct rb_rectangle * rect, struct vec2 
 
 
 void rb_shape_delete(struct rb_shape_base * shape);
+
+
+void rb_shape_update_aabb(struct rb_shape_base * shape);
 
 
 #endif /*__LIBTARPE2D_RB_SHAPE_H__*/

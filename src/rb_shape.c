@@ -8,6 +8,7 @@
 	do {                                                           \
 		rb.mass = mass;                                        \
 		rb.inv_mass = 1 / mass;                                \
+		rb.friction = friction;                                \
 		vec2_copy(&rb.pos, start_pos);                         \
 		vec2_copy(&rb.linear_velocity, start_linear_velocity); \
 		rb.angle = start_angle;                                \
@@ -21,11 +22,11 @@ struct rb_circle * rb_circle_new(float_t radius, _RB_INIT_ARGS)
 	if (circ != NULL)
 	{
 		_SET_RB_INIT_ARGS(circ->base.rb);
+		circ->circle.radius = radius;
+
 		circ->base.rb.inv_moment_of_inertia =
 			2 / (circ->base.rb.mass * flt_squared(circ->circle.radius));
 		circ->base.type = TARPE__SHAPE_TYPE__CIRCLE;
-
-		circ->circle.radius = radius;
 
 		aabb_init(&(circ->base.aabb), start_pos, radius, radius);
 	}
@@ -113,3 +114,18 @@ void rb_rectangle_update_normals(struct rb_rectangle * rect)
 
 
 void rb_shape_delete(struct rb_shape_base * shape) { free(shape); }
+
+
+void rb_shape_update_aabb(struct rb_shape_base * shape)
+{
+	if (shape->type == TARPE__SHAPE_TYPE__CIRCLE)
+	{
+		float_t radius = ((struct rb_circle *)shape)->circle.radius;
+		aabb_init(&(shape->aabb), &(shape->rb.pos), radius, radius);
+	}
+	else
+	{
+		float_t aabb_side = vec2_abs(&(((struct rb_rectangle *)shape)->rect.half_side_sizes));
+		aabb_init(&(shape->aabb), &(shape->rb.pos), aabb_side, aabb_side);
+	}
+}

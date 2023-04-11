@@ -1,3 +1,4 @@
+#include <libtarpe2d/collisions/manifold.h>
 #include <libtarpe2d/collisions/narrow_phase.h>
 #include <libtarpe2d/math_utils.h>
 #include <libtarpe2d/projection.h>
@@ -5,7 +6,7 @@
 
 
 static inline bool get_circle_circle_penetration(struct rb_circle * circ_1, struct rb_circle * circ_2,
-						 struct vec2 * penetration_out)
+						 struct manifold * manifold)
 {
 	struct vec2 dist;
 	vec2_sub(&(circ_2->base.rb.pos), &(circ_1->base.rb.pos), &dist);
@@ -13,8 +14,8 @@ static inline bool get_circle_circle_penetration(struct rb_circle * circ_1, stru
 	float_t depth = (circ_1->circle.radius + circ_2->circle.radius) - dist_abs;
 	if (depth > 0)
 	{
-		vec2_div(&dist, dist_abs, &dist);
-		vec2_mul(&dist, depth, penetration_out);
+		vec2_div(&dist, dist_abs, &(manifold->normal));
+		manifold->depth = depth;
 		return true;
 	}
 	return false;
@@ -92,7 +93,7 @@ static inline void get_circle_rect_third_axis(struct rb_circle * circ, struct rb
 }
 
 static inline bool get_circle_rect_penetration(struct rb_circle * circ, struct rb_rectangle * rect,
-					       struct vec2 * penetration_out)
+					       struct manifold * manifold)
 {
 	struct vec2 * axis_normal = NULL;
 	float_t overlap = FLT_T_MAX, cur_overlap;
@@ -124,12 +125,13 @@ static inline bool get_circle_rect_penetration(struct rb_circle * circ, struct r
 
 	set_mtv_from_1_to_2(&(circ->base), &(rect->base), axis_normal);
 
-	vec2_mul(axis_normal, overlap, penetration_out);
+	manifold->normal = *axis_normal;
+	manifold->depth = overlap;
 	return true;
 }
 
 static inline bool get_rect_rect_penetration(struct rb_rectangle * rect_1, struct rb_rectangle * rect_2,
-					     struct vec2 * penetration_out)
+					     struct manifold * manifold)
 {
 	struct vec2 * axis_normal = NULL;
 	float_t overlap = FLT_T_MAX, cur_overlap;
@@ -164,39 +166,40 @@ static inline bool get_rect_rect_penetration(struct rb_rectangle * rect_1, struc
 
 	set_mtv_from_1_to_2(&(rect_1->base), &(rect_1->base), axis_normal);
 
-	vec2_mul(axis_normal, overlap, penetration_out);
+	manifold->normal = *axis_normal;
+	manifold->depth = overlap;
 	return true;
 }
 
 
-bool get_penetration(struct rb_shape_base * body_1, struct rb_shape_base * body_2,
-		     struct vec2 * penetration_out)
+bool get_penetration(struct manifold * manifold)
 {
-	if (body_1->type == TARPE__SHAPE_TYPE__CIRCLE)
+	if (manifold->body_1->type == TARPE__SHAPE_TYPE__CIRCLE)
 	{
-		if (body_2->type == TARPE__SHAPE_TYPE__CIRCLE)
-			return get_circle_circle_penetration(
-				(struct rb_circle *)body_1, (struct rb_circle *)body_2, penetration_out);
-		else /* body_2->type == TARPE__SHAPE_TYPE__RECTANGLE */
-			return get_circle_rect_penetration((struct rb_circle *)body_1,
-							   (struct rb_rectangle *)body_2,
-							   penetration_out);
+		if (manifold->body_2->type == TARPE__SHAPE_TYPE__CIRCLE)
+			return get_circle_circle_penetration((struct rb_circle *)manifold->body_1,
+							     (struct rb_circle *)manifold->body_2,
+							     manifold);
+		else /* manifold->body_2->type == TARPE__SHAPE_TYPE__RECTANGLE */
+			return get_circle_rect_penetration((struct rb_circle *)manifold->body_1,
+							   (struct rb_rectangle *)manifold->body_2,
+							   manifold);
 	}
-	else /* body_1->type == TARPE__SHAPE_TYPE__RECTANGLE */
+	else /* manifold->body_1->type == TARPE__SHAPE_TYPE__RECTANGLE */
 	{
-		if (body_2->type == TARPE__SHAPE_TYPE__CIRCLE)
+		if (manifold->body_2->type == TARPE__SHAPE_TYPE__CIRCLE)
 		{
-			bool res = get_circle_rect_penetration((struct rb_circle *)body_2,
-							       (struct rb_rectangle *)body_1,
-							       penetration_out);
-			if (res) vec2_neg(penetration_out, penetration_out);
+			bool res = get_circle_rect_penetration((struct rb_circle *)manifold->body_2,
+							       (struct rb_rectangle *)manifold->body_1,
+							       manifold);
+			if (res) vec2_neg(&(manifold->normal), &(manifold->normal));
 			return res;
 		}
-		else /* body_2->type == TARPE__SHAPE_TYPE__RECTANGLE */
+		else /* manifold->body_2->type == TARPE__SHAPE_TYPE__RECTANGLE */
 		{
-			return get_rect_rect_penetration((struct rb_rectangle *)body_1,
-							 (struct rb_rectangle *)body_2,
-							 penetration_out);
+			return get_rect_rect_penetration((struct rb_rectangle *)manifold->body_1,
+							 (struct rb_rectangle *)manifold->body_2,
+							 manifold);
 		}
 	}
 }

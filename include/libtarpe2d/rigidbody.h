@@ -12,6 +12,8 @@ struct rigidbody
 	float_t inv_mass;
 	float_t inv_moment_of_inertia;
 
+	float_t friction;
+
 	struct vec2 pos;
 
 	struct vec2 linear_velocity;

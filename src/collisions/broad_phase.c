@@ -70,14 +70,15 @@ int sap_cd_broad_phase(struct rbs_array * bodies)
 	}          \
 	}
 
-#define PROCESS_POSSIBLE_COLLISION                                    \
-	if (get_penetration(*sub_iter, *main_iter, &penetration))     \
-	{                                                             \
-		solve_collision(*sub_iter, *main_iter, &penetration); \
-	}
+#define PROCESS_POSSIBLE_COLLISION                                          \
+	do {                                                                \
+		manifold.body_1 = *main_iter;                               \
+		manifold.body_2 = *sub_iter;                                \
+		if (get_penetration(&manifold)) solve_collision(&manifold); \
+	} while (0);
 
 	int sort_axis = find_axis(bodies);
-	struct vec2 penetration;
+	struct manifold manifold;
 	if (sort_axis == 1) /* y */
 	{
 		qsort(sorted, bodies->size, sizeof(struct rb_shape_base *), _cmp_bodies_y);

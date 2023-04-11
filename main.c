@@ -1,3 +1,4 @@
+#include <bsd/stdlib.h>
 #include <errno.h>
 #include <libtarpe2d.h>
 #include <libtarpe2d_draw.h>
@@ -6,9 +7,9 @@
 #define WIDTH 1280
 #define HEIGHT 720
 
-#define PLANETARY_SYSTEM
+// #define PLANETARY_SYSTEM
 #ifndef PLANETARY_SYSTEM
-#	define SHAPES_DIST 25
+#	define SHAPES_DIST 50
 #	define _SIDE_SHAPES_COUNT(SIDE_LEN) \
 		((SIDE_LEN + 1) / SHAPES_DIST + ((SIDE_LEN + 1) % SHAPES_DIST == 0 ? 0 : 1))
 #	define SHAPES_ROW_COUNT (_SIDE_SHAPES_COUNT(WIDTH))
@@ -17,22 +18,22 @@
 #	define DT_COEF 0.1
 #	define TICKS_PER_FRAME 1
 #else
-#	define SHAPES_COUNT 5
+#	define SHAPES_COUNT 2
 #	define DT_COEF 1
-#	define TICKS_PER_FRAME 4
+#	define TICKS_PER_FRAME 60
 #endif
 
 #define NO_VSYNC
 #ifdef NO_VSYNC
 // Define here any fps you want
-#	define MAX_FPS 240
+#	define MAX_FPS 60
 #else
 // There MUST be 60
 #	define MAX_FPS 60
 #endif
 #define MIN_DT (1. / MAX_FPS)
 
-#define SAVE_TRAJS
+// #define SAVE_TRAJS
 #define SECS_TO_SAVE_TRAJS 65
 
 
@@ -70,47 +71,58 @@ int main(void)
 	{
 		for (size_t x = 0; x < SHAPES_ROW_COUNT; ++x)
 		{
-			shapes[SHAPES_ROW_COUNT * y + x].color = (SDL_Color){0xff, 0, 0, 0xff};
-			shapes[SHAPES_ROW_COUNT * y + x].rb_shape = (struct rb_shape_base *)rb_circle_new(
-				SHAPES_DIST / 2., 50,
-				&(struct vec2){x * SHAPES_DIST, y * SHAPES_DIST}, &(struct vec2){0, 0},
-				0, 0
-			);
+			if (arc4random_uniform(2) == 1)
+			{
+				shapes[SHAPES_ROW_COUNT * y + x].color = (SDL_Color){0xff, 0, 0, 0xff};
+				shapes[SHAPES_ROW_COUNT * y + x].rb_shape = (struct rb_shape_base *)rb_circle_new(
+					SHAPES_DIST / 4., 50, 1,
+					&(struct vec2){x * SHAPES_DIST, y * SHAPES_DIST}, &(struct vec2){0, 0},
+					0, 0
+				);
+			}
+			else
+			{
+				shapes[SHAPES_ROW_COUNT * y + x].color = (SDL_Color){0, 0xff, 0, 0xff};
+				shapes[SHAPES_ROW_COUNT * y + x].rb_shape = (struct rb_shape_base *)rb_rectangle_new(
+					SHAPES_DIST / 4., SHAPES_DIST / 4., 10, 1,
+					&(struct vec2){x * SHAPES_DIST, y * SHAPES_DIST}, &(struct vec2){0, 0},
+					0.7, 0
+				);
+			}
 		}
 	}
 #else
-
 	shapes[0].color = (SDL_Color){0xff, 0, 0, 0xff};
 	shapes[0].rb_shape = (struct rb_shape_base *)rb_circle_new(
-		50, 100,
+		50, 100, 1,
 		&(struct vec2){WIDTH / 2., HEIGHT / 2.}, &(struct vec2){0, 0},
 		0, 0
 	);
 
 	shapes[1].color = (SDL_Color){0x3f, 0x9f, 0x5f, 0xff};
 	shapes[1].rb_shape = (struct rb_shape_base *)rb_circle_new(
-		10, 0.2,
+		10, 0.2, 1,
 		&(struct vec2){WIDTH / 1.5, HEIGHT / 2.}, &(struct vec2){0, 200},
 		0, 0
 	);
 
 	shapes[2].color = (SDL_Color){0x3f, 0x9f, 0x5f, 0xff};
 	shapes[2].rb_shape = (struct rb_shape_base *)rb_circle_new(
-		10, 0.2,
+		10, 0.2, 1,
 		&(struct vec2){WIDTH / 1.2, HEIGHT / 2.}, &(struct vec2){0, 150},
 		0, 0
 	);
 
 	shapes[3].color = (SDL_Color){0x3f, 0x9f, 0x5f, 0xff};
 	shapes[3].rb_shape = (struct rb_shape_base *)rb_circle_new(
-		20, 0.5,
+		20, 0.5, 1,
 		&(struct vec2){WIDTH, HEIGHT / 2.}, &(struct vec2){0, 95},
 		0, 0
 	);
 
 	shapes[4].color = (SDL_Color){0x7f, 0xff, 0, 0xff};
 	shapes[4].rb_shape = (struct rb_shape_base *)rb_circle_new(
-		15, 0.5,
+		15, 0.5, 1,
 		&(struct vec2){WIDTH + 50, HEIGHT / 2.}, &(struct vec2){0, 135},
 		0, 0
 	);
@@ -137,13 +149,13 @@ int main(void)
 						     GPU_DEFAULT_INIT_FLAGS
 #endif
 	);
-	tarpe2d_draw_zoom_camera(screen, 0.25, 0.25);
+	tarpe2d_draw_zoom_camera(screen, 0.5, 0.5);
 	if (screen == NULL) goto cleanup_shapes;
 	// GPU_SetFullscreen(true, true);
 
 	struct tarpe_config tarpe_cfg;
 	tarpe_config_set_default(&tarpe_cfg);
-	tarpe_cfg.grav_const = 8.8E+4;
+	tarpe_cfg.grav_const = 8.8E+1;
 	tarpe_init(&tarpe_cfg);
 
 	int is_done = 0;
@@ -175,12 +187,13 @@ int main(void)
 
 		for (int64_t i = 0; i < TICKS_PER_FRAME; ++i)
 		{
-			if (tarpe_tick(&rbs_arr, dt * DT_COEF))
+			if (tarpe_tick(&rbs_arr, dt / TICKS_PER_FRAME))
 			{
 				printf("Couldn't allocate memory to tick rigidbodies!\n");
 				ret = ENOMEM;
 				goto cleanup_shapes;
 			}
+			// printf("%f\n", shapes[0].rb_shape->rb.linear_velocity.x);
 		}
 
 		tarpe2d_draw(screen,
