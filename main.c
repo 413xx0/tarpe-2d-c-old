@@ -6,21 +6,23 @@
 
 #define WIDTH 1280
 #define HEIGHT 720
+#define ZOOM 0.5
+#define GRAV_CONST 8.8E+2
 
 // #define PLANETARY_SYSTEM
 #ifndef PLANETARY_SYSTEM
-#	define SHAPES_DIST 50
+#	define SHAPES_DIST 100
 #	define _SIDE_SHAPES_COUNT(SIDE_LEN) \
 		((SIDE_LEN + 1) / SHAPES_DIST + ((SIDE_LEN + 1) % SHAPES_DIST == 0 ? 0 : 1))
 #	define SHAPES_ROW_COUNT (_SIDE_SHAPES_COUNT(WIDTH))
 #	define SHAPES_COL_COUNT (_SIDE_SHAPES_COUNT(HEIGHT))
 #	define SHAPES_COUNT (SHAPES_ROW_COUNT * SHAPES_COL_COUNT)
-#	define DT_COEF 0.1
-#	define TICKS_PER_FRAME 1
+#	define DT_COEF 5
+#	define TICKS_PER_FRAME 64
 #else
-#	define SHAPES_COUNT 2
-#	define DT_COEF 1
-#	define TICKS_PER_FRAME 60
+#	define SHAPES_COUNT 5
+#	define DT_COEF 4
+#	define TICKS_PER_FRAME 4
 #endif
 
 #define NO_VSYNC
@@ -33,7 +35,7 @@
 #endif
 #define MIN_DT (1. / MAX_FPS)
 
-// #define SAVE_TRAJS
+#define SAVE_TRAJS
 #define SECS_TO_SAVE_TRAJS 65
 
 
@@ -71,7 +73,7 @@ int main(void)
 	{
 		for (size_t x = 0; x < SHAPES_ROW_COUNT; ++x)
 		{
-			if (arc4random_uniform(2) == 1)
+			if (arc4random_uniform(2) != 1)
 			{
 				shapes[SHAPES_ROW_COUNT * y + x].color = (SDL_Color){0xff, 0, 0, 0xff};
 				shapes[SHAPES_ROW_COUNT * y + x].rb_shape = (struct rb_shape_base *)rb_circle_new(
@@ -84,7 +86,7 @@ int main(void)
 			{
 				shapes[SHAPES_ROW_COUNT * y + x].color = (SDL_Color){0, 0xff, 0, 0xff};
 				shapes[SHAPES_ROW_COUNT * y + x].rb_shape = (struct rb_shape_base *)rb_rectangle_new(
-					SHAPES_DIST / 4., SHAPES_DIST / 4., 10, 1,
+					SHAPES_DIST / 4., SHAPES_DIST / 2., 10, 1,
 					&(struct vec2){x * SHAPES_DIST, y * SHAPES_DIST}, &(struct vec2){0, 0},
 					0.7, 0
 				);
@@ -92,10 +94,22 @@ int main(void)
 		}
 	}
 #else
+	// shapes[0].color = (SDL_Color){0xff, 0, 0, 0xff};
+	// shapes[1].color = (SDL_Color){0xff, 0, 0, 0xff};
+	// shapes[0].rb_shape = (struct rb_shape_base *)rb_circle_new(
+	// 	50, 100, 1,
+	// 	&(struct vec2){WIDTH / 2. - 60., HEIGHT / 2.}, &(struct vec2){0, 0},
+	// 	0, 0
+	// );
+	// shapes[1].rb_shape = (struct rb_shape_base *)rb_circle_new(
+	// 	50, 100, 1,
+	// 	&(struct vec2){WIDTH / 2. + 60., HEIGHT / 2.}, &(struct vec2){0, 0},
+	// 	0, 0
+	// );
 	shapes[0].color = (SDL_Color){0xff, 0, 0, 0xff};
 	shapes[0].rb_shape = (struct rb_shape_base *)rb_circle_new(
 		50, 100, 1,
-		&(struct vec2){WIDTH / 2., HEIGHT / 2.}, &(struct vec2){0, 0},
+		&(struct vec2){WIDTH / 2., HEIGHT / 2. + 250}, &(struct vec2){0, 0},
 		0, 0
 	);
 
@@ -149,13 +163,14 @@ int main(void)
 						     GPU_DEFAULT_INIT_FLAGS
 #endif
 	);
-	tarpe2d_draw_zoom_camera(screen, 0.5, 0.5);
+	// tarpe2d_draw_zoom_camera(screen, 0.5, 0.5);
+	tarpe2d_draw_zoom_camera_xy(screen, ZOOM);
 	if (screen == NULL) goto cleanup_shapes;
 	// GPU_SetFullscreen(true, true);
 
 	struct tarpe_config tarpe_cfg;
 	tarpe_config_set_default(&tarpe_cfg);
-	tarpe_cfg.grav_const = 8.8E+1;
+	tarpe_cfg.grav_const = GRAV_CONST;
 	tarpe_init(&tarpe_cfg);
 
 	int is_done = 0;
@@ -193,7 +208,6 @@ int main(void)
 				ret = ENOMEM;
 				goto cleanup_shapes;
 			}
-			// printf("%f\n", shapes[0].rb_shape->rb.linear_velocity.x);
 		}
 
 		tarpe2d_draw(screen,
