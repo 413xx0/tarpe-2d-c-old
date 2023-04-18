@@ -13,7 +13,7 @@ static inline void tick_velocities(struct rigidbody * rb, float_t dt)
 
 	vec2_add(&rb->linear_velocity, &tmp, &rb->linear_velocity); // v += a * dt
 
-	float_t angular_acceleration = rb->torque / rb->inv_moment_of_inertia;
+	float_t angular_acceleration = rb->torque * rb->inv_moment_of_inertia;
 	rb->angular_velocity += angular_acceleration * dt;
 
 	vec2_nullify(&rb->tick_force);

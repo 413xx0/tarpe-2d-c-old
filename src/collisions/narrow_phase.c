@@ -164,7 +164,7 @@ static inline bool get_rect_rect_penetration(struct rb_rectangle * rect_1, struc
 
 	if (axis_normal == NULL) return false;
 
-	set_mtv_from_1_to_2(&(rect_1->base), &(rect_1->base), axis_normal);
+	set_mtv_from_1_to_2(&(rect_1->base), &(rect_2->base), axis_normal);
 
 	manifold->normal = *axis_normal;
 	manifold->depth = overlap;
