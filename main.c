@@ -6,23 +6,35 @@
 
 #define WIDTH 1280
 #define HEIGHT 720
-#define ZOOM 0.5
-#define GRAV_CONST 8.8E+2
 
 // #define PLANETARY_SYSTEM
-#ifndef PLANETARY_SYSTEM
+#define BOUNCY_BALLS
+#if !defined(PLANETARY_SYSTEM) && !defined(BOUNCY_BALLS)
 #	define SHAPES_DIST 100
 #	define _SIDE_SHAPES_COUNT(SIDE_LEN) \
 		((SIDE_LEN + 1) / SHAPES_DIST + ((SIDE_LEN + 1) % SHAPES_DIST == 0 ? 0 : 1))
 #	define SHAPES_ROW_COUNT (_SIDE_SHAPES_COUNT(WIDTH))
 #	define SHAPES_COL_COUNT (_SIDE_SHAPES_COUNT(HEIGHT))
 #	define SHAPES_COUNT (SHAPES_ROW_COUNT * SHAPES_COL_COUNT)
+#	define CIRC_MASS 25
+#	define RECT_MASS 10
 #	define DT_COEF 5
 #	define TICKS_PER_FRAME 64
-#else
+#	define GRAV_CONST 8.8E+2
+#	define ZOOM 0.5
+#elif defined(PLANETARY_SYSTEM)
 #	define SHAPES_COUNT 5
 #	define DT_COEF 4
 #	define TICKS_PER_FRAME 4
+#	define GRAV_CONST 8.8E+4
+#	define ZOOM 0.3
+// #	define MOVE_SUN
+#elif defined(BOUNCY_BALLS)
+#	define SHAPES_COUNT 2
+#	define DT_COEF 32
+#	define TICKS_PER_FRAME 32
+#	define GRAV_CONST 8.8E+4
+#	define ZOOM 0.5
 #endif
 
 #define NO_VSYNC
@@ -68,7 +80,7 @@ int main(void)
 #endif
 
 	// clang-format off
-#ifndef PLANETARY_SYSTEM
+#if !defined(PLANETARY_SYSTEM) && !defined(BOUNCY_BALLS)
 	for (size_t y = 0; y < SHAPES_COL_COUNT; ++y)
 	{
 		for (size_t x = 0; x < SHAPES_ROW_COUNT; ++x)
@@ -77,7 +89,7 @@ int main(void)
 			{
 				shapes[SHAPES_ROW_COUNT * y + x].color = (SDL_Color){0xff, 0, 0, 0xff};
 				shapes[SHAPES_ROW_COUNT * y + x].rb_shape = (struct rb_shape_base *)rb_circle_new(
-					SHAPES_DIST / 4., 50, 1,
+					SHAPES_DIST / 4., CIRC_MASS, 1,
 					&(struct vec2){x * SHAPES_DIST, y * SHAPES_DIST}, &(struct vec2){0, 0},
 					0, 0
 				);
@@ -86,30 +98,36 @@ int main(void)
 			{
 				shapes[SHAPES_ROW_COUNT * y + x].color = (SDL_Color){0, 0xff, 0, 0xff};
 				shapes[SHAPES_ROW_COUNT * y + x].rb_shape = (struct rb_shape_base *)rb_rectangle_new(
-					SHAPES_DIST / 4., SHAPES_DIST / 2., 10, 1,
+					SHAPES_DIST / 4., SHAPES_DIST / 2., RECT_MASS, 1,
 					&(struct vec2){x * SHAPES_DIST, y * SHAPES_DIST}, &(struct vec2){0, 0},
 					0.7, 0
 				);
 			}
 		}
 	}
-#else
-	// shapes[0].color = (SDL_Color){0xff, 0, 0, 0xff};
-	// shapes[1].color = (SDL_Color){0xff, 0, 0, 0xff};
-	// shapes[0].rb_shape = (struct rb_shape_base *)rb_circle_new(
-	// 	50, 100, 1,
-	// 	&(struct vec2){WIDTH / 2. - 60., HEIGHT / 2.}, &(struct vec2){0, 0},
-	// 	0, 0
-	// );
-	// shapes[1].rb_shape = (struct rb_shape_base *)rb_circle_new(
-	// 	50, 100, 1,
-	// 	&(struct vec2){WIDTH / 2. + 60., HEIGHT / 2.}, &(struct vec2){0, 0},
-	// 	0, 0
-	// );
+#elif defined(BOUNCY_BALLS)
+	shapes[0].color = (SDL_Color){0xff, 0, 0, 0xff};
+	shapes[1].color = (SDL_Color){0xff, 0, 0, 0xff};
+	shapes[0].rb_shape = (struct rb_shape_base *)rb_circle_new(
+		50, 100, 1,
+		&(struct vec2){WIDTH / 2. - 60., HEIGHT / 2.}, &(struct vec2){0, 0},
+		0, 0
+	);
+	shapes[1].rb_shape = (struct rb_shape_base *)rb_circle_new(
+		50, 100, 1,
+		&(struct vec2){WIDTH / 2. + 60., HEIGHT / 2.}, &(struct vec2){0, 0},
+		0, 0
+	);
+#elif defined(PLANETARY_SYSTEM)
 	shapes[0].color = (SDL_Color){0xff, 0, 0, 0xff};
 	shapes[0].rb_shape = (struct rb_shape_base *)rb_circle_new(
 		50, 100, 1,
-		&(struct vec2){WIDTH / 2., HEIGHT / 2. + 250}, &(struct vec2){0, 0},
+#ifdef MOVE_SUN
+		&(struct vec2){WIDTH / 2., HEIGHT / 2. + 250},
+#else
+		&(struct vec2){WIDTH / 2., HEIGHT / 2.},
+#endif /* MOVE_SUN */
+		&(struct vec2){0, 0},
 		0, 0
 	);
 
@@ -140,7 +158,7 @@ int main(void)
 		&(struct vec2){WIDTH + 50, HEIGHT / 2.}, &(struct vec2){0, 135},
 		0, 0
 	);
-#endif /*PLANETARY_SYSTEM*/
+#endif
 
 	struct rb_shape_base ** __rbs_arr = malloc(sizeof(struct rb_shape_base *) * SHAPES_COUNT);
 	for (size_t i = 0; i < SHAPES_COUNT; ++i)
